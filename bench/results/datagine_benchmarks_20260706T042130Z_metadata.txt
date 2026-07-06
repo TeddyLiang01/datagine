@@ -1,0 +1,25 @@
+timestamp_utc: 20260706T042130Z
+git_commit: dafb2ac
+build_type: Release
+benchmark_target: /Users/teddy/datagine/build-bench/bench/datagine_benchmarks
+
+uname:
+Darwin MacBookPro.lan 24.5.0 Darwin Kernel Version 24.5.0: Tue Apr 22 19:54:49 PDT 2025; root:xnu-11417.121.6~2/RELEASE_ARM64_T6000 arm64
+
+cpu:
+Apple M1 Pro
+10
+
+memory:
+17179869184
+
+compiler:
+Apple clang version 17.0.0 (clang-1700.0.13.5)
+Target: arm64-apple-darwin24.5.0
+Thread model: posix
+InstalledDir: /Library/Developer/CommandLineTools/usr/bin
+
+cmake:
+cmake version 4.3.4
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).

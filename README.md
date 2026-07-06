@@ -38,9 +38,9 @@ Phase 3 adds an optional benchmark harness for order book and CSV replay paths.
 Phase 4 adds an opt-in pooled order book for baseline-versus-optimized
 comparison. Phase 5 adds an optional SPSC ring buffer for parser-to-engine
 handoff experiments. Phase 6 adds lightweight microstructure anomaly monitoring.
-Binary replay remains a future phase. This README intentionally does not include
-benchmark numbers; generated results must include methodology and environment
-details.
+Binary replay remains a future phase. The benchmark snapshot below reports one
+local synthetic run and should be read with the linked methodology and captured
+environment details.
 
 ## Architecture Direction
 
@@ -104,6 +104,38 @@ scripts/run_bench.sh
 Benchmark output is generated under `bench/results/`. See
 [docs/benchmark-methodology.md](docs/benchmark-methodology.md) before treating
 any result as meaningful.
+
+## Benchmark Snapshot
+
+Benchmarks were run on synthetic exchange-style workloads.
+
+Environment:
+
+- Machine: MacBook Pro, Apple M1 Pro
+- CPU cores: 10
+- Memory: 16 GB
+- OS: macOS Darwin 24.5.0 arm64
+- Compiler: Apple Clang 17.0.0
+- Build: Release
+- Benchmark library: Google Benchmark v1.9.5
+
+| Benchmark | Workload Size | Mean Throughput |
+|---|---:|---:|
+| Pooled add hot path | 4,096 orders | ~30.3M orders/s |
+| Pooled add hot path | 16,384 orders | ~30.9M orders/s |
+| Pooled cancel hot path | 4,096 orders | ~25.3M orders/s |
+| Pooled cancel hot path | 16,384 orders | ~20.2M orders/s |
+| Pooled mixed add/cancel/execute | 4,096 events | ~36.9M events/s |
+| Pooled mixed add/cancel/execute | 16,384 events | ~37.1M events/s |
+| Pooled CSV parse + apply | 4,096 events | ~2.26M events/s |
+| Pooled CSV parse + apply | 16,384 events | ~2.28M events/s |
+
+Notes:
+
+- Results are local synthetic-workload measurements and are hardware-dependent.
+- The SPSC benchmark is included for experimentation, but threaded wall-clock
+  interpretation is still being refined.
+- Anomaly detection currently runs off the critical path.
 
 See [docs/optimization-notes.md](docs/optimization-notes.md) for the current
 optimization tradeoffs.

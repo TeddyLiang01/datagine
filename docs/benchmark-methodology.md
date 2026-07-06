@@ -52,6 +52,8 @@ The Phase 3 benchmarks expose rate counters:
   in-memory event stream directly to the book.
 - `BM_SpscQueuedReplayInMemory`: events per second for sending the same
   deterministic event stream through the SPSC queue to a consumer book thread.
+  Use the explicit `wall_events_per_second` counter as the throughput number for
+  this benchmark.
 - `BM_FeatureExtractionAnomalyScoring`: events per second for applying a
   deterministic event stream and running feature extraction plus EWMA/z-score
   scoring.
@@ -67,6 +69,22 @@ Phase 4 splits these into baseline and pooled variants:
 The pooled variants use the same deterministic fixtures and preallocate order
 nodes before timing begins where the benchmark is intended to isolate hot-path
 updates.
+
+## Threaded Timing
+
+Google Benchmark's default timing is useful for single-threaded hot paths, but
+CPU-time-derived rates can be misleading for producer/consumer benchmarks. A
+threaded handoff benchmark has two active threads, spin/yield behavior, scheduler
+effects, and thread coordination costs. CPU time does not necessarily represent
+the elapsed time that a replay user experiences for the full handoff.
+
+For `BM_SpscQueuedReplayInMemory`, Datagine measures explicit wall-clock elapsed
+time with `std::chrono::steady_clock` from immediately before starting the
+producer and consumer work until both threads have joined. The benchmark reports
+that value as `wall_events_per_second`. Treat this counter as the headline
+throughput for the SPSC handoff case, and do not use CPU-time-derived
+`items_per_second` or generic rate columns as the headline number for that
+threaded benchmark.
 
 ## Reproducibility
 

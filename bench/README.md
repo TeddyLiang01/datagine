@@ -26,6 +26,10 @@ The benchmark target includes:
 - `BM_SpscQueuedReplayInMemory`
 - `BM_FeatureExtractionAnomalyScoring`
 
+`BM_SpscQueuedReplayInMemory` is a threaded producer/consumer benchmark. Use its
+`wall_events_per_second` counter as the throughput number; CPU-time-derived rate
+columns are not the headline measurement for that case.
+
 ## Results
 
 Use `scripts/run_bench.sh` to run the harness and write generated text, JSON,

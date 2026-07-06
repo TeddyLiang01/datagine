@@ -8,6 +8,7 @@
 #include <benchmark/benchmark.h>
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -433,6 +434,8 @@ void BM_SpscQueuedReplayInMemory(benchmark::State& state) {
     const auto events = make_mixed_stream(cycles);
     SpscRingBuffer queue{1024};
     LimitOrderBook book;
+    std::uint64_t total_events = 0;
+    std::chrono::nanoseconds total_wall_elapsed{0};
 
     for (auto _ : state) {
         state.PauseTiming();
@@ -440,6 +443,10 @@ void BM_SpscQueuedReplayInMemory(benchmark::State& state) {
         state.ResumeTiming();
 
         std::atomic<bool> failed{false};
+
+        // Threaded handoff is interpreted with explicit wall time; Google
+        // Benchmark CPU time is not the headline rate for this case.
+        const auto wall_start = std::chrono::steady_clock::now();
 
         std::thread producer{[&events, &queue]() {
             for (const auto& event : events) {
@@ -469,6 +476,11 @@ void BM_SpscQueuedReplayInMemory(benchmark::State& state) {
         producer.join();
         consumer.join();
 
+        const auto wall_end = std::chrono::steady_clock::now();
+        total_wall_elapsed += std::chrono::duration_cast<std::chrono::nanoseconds>(
+            wall_end - wall_start);
+        total_events += static_cast<std::uint64_t>(events.size());
+
         if (failed.load(std::memory_order_relaxed)) {
             state.SkipWithError("SPSC replay event was rejected by the book");
             break;
@@ -478,10 +490,10 @@ void BM_SpscQueuedReplayInMemory(benchmark::State& state) {
         benchmark::ClobberMemory();
     }
 
-    set_rate_counter(
-        state,
-        "events/s",
-        state.iterations() * static_cast<std::int64_t>(events.size()));
+    const auto wall_seconds = std::chrono::duration<double>(total_wall_elapsed).count();
+    state.counters["wall_events_per_second"] = wall_seconds > 0.0
+        ? static_cast<double>(total_events) / wall_seconds
+        : 0.0;
 }
 
 void BM_FeatureExtractionAnomalyScoring(benchmark::State& state) {
