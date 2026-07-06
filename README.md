@@ -1,5 +1,7 @@
 # Datagine
 
+[![CI](https://github.com/TeddyLiang01/datagine/actions/workflows/ci.yml/badge.svg)](https://github.com/TeddyLiang01/datagine/actions/workflows/ci.yml)
+
 Datagine is a C++20 low-latency market data engine for deterministic order-book
 replay, benchmarking, and lightweight market microstructure anomaly detection.
 The project is designed as a systems engineering artifact: the core value is
